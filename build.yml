@@ -1,0 +1,29 @@
+name: Build APK
+on:
+  push:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Arrange files
+        run: |
+          mkdir -p app/src/main/assets app/src/main/res/drawable app/src/main/java/com/duroos/app
+          mv app-build.gradle app/build.gradle
+          mv AndroidManifest.xml app/src/main/
+          mv MainActivity.java PlayerService.java app/src/main/java/com/duroos/app/
+          mv -f duroos-yousef.html app/src/main/assets/index.html
+          mv ic_launcher.xml ic_notif.xml app/src/main/res/drawable/
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.5'
+      - run: gradle assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: duroos-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
